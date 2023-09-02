@@ -60,6 +60,8 @@ class Predictor(BasePredictor):
         mask: Path = Input(description="Mask image"),
         negative_prompt: str = "(deformed iris, deformed pupils, semi-realistic, cgi, 3d, render, sketch, cartoon, drawing, anime:1.4), text, close up, cropped, out of frame, worst quality, low quality, jpeg artifacts, ugly, duplicate, morbid, mutilated, extra fingers, mutated hands, poorly drawn hands, poorly drawn face, mutation, deformed, blurry, dehydrated, bad anatomy, bad proportions, extra limbs, cloned face, disfigured, gross proportions, malformed limbs, missing arms, missing legs, extra arms, extra legs, fused fingers, too many fingers, long neck",
         strength: float = Input(description="strength/weight", ge=0, le=1, default=0.8),
+        image_size: float = Input(description="max image height/width", ge=128, default=612),
+        mask_size: float = Input(description="max image height/width", ge=128, default=612),
         steps: int = Input(description=" num_inference_steps", ge=0, le=100, default=20),
         seed: int = Input(description="Leave blank to randomize",  default=None),
     ) -> Path:
@@ -69,8 +71,8 @@ class Predictor(BasePredictor):
         generator = torch.Generator('cuda').manual_seed(seed)
         print("Using seed:", seed)
 
-        r_image = self.scale_down_image(image,1280)
-        r_mask = self.scale_down_image(mask, 1280)
+        r_image = self.scale_down_image(image, image_size)
+        r_mask = self.scale_down_image(mask, mask_size)
         width, height = r_image.size
         image = self.pipe(
             prompt=prompt,
